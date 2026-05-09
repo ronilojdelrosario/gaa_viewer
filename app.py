@@ -2,6 +2,12 @@ import streamlit as st
 from lib.data_ops import load_gaa_data
 
 st.set_page_config(layout="wide",page_title="GAA Viewer",page_icon=":ledger:")
+
+if "department" not in st.session_state:
+    st.session_state["department"] = "Congress of the Philippines (CONGRESS)"
+if "agency" not in st.session_state:
+    st.session_state["agency"] = "Senate"
+
 data = load_gaa_data()
 
 department = st.sidebar.selectbox("Department:",data.UACS_DPT_DSC.unique())
