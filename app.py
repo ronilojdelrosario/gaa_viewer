@@ -10,8 +10,8 @@ st.markdown(
     r"""
     <style>
     button[data-testid="stExpandSidebarButton"] {
-            height: 3rem;
-            width : 3rem;
+            height: 2rem;
+            width : 2rem;
             animation: bounce 2s ease infinite;
         }
     @keyframes bounce {
