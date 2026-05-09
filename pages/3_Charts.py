@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from lib.data_ops import get_department_agencies_budget, get_departments_budgets, load_gaa_data_summary, load_gaa_data_summary_forchart
+from lib.data_ops import get_department_agencies_budget, get_departments_budgets, load_gaa_data_summary_deptagy, load_gaa_data_summary_forchart
 from lib.utils import initialize_states
 
 initialize_states()
@@ -56,7 +56,7 @@ st.write("##")
 
 ##################################   Budget Distribution By Type   ##################################
 
-summary_dept_chart = load_gaa_data_summary(department=department,type="purpose").drop(columns=["Total"]).melt(id_vars=["Name","UACS_AGY_DSC"],var_name="Expense Type",value_name="AMT")
+summary_dept_chart = load_gaa_data_summary_deptagy(department=department,type="purpose").drop(columns=["Total"]).melt(id_vars=["Name","UACS_AGY_DSC"],var_name="Expense Type",value_name="AMT")
 
 st.header("Budget Distribution by Cost Structure and Expense Type", text_alignment = "center")
 

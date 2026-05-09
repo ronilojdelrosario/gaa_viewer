@@ -1,5 +1,5 @@
 import streamlit as st
-from lib.data_ops import load_gaa_data
+from lib.data_ops import load_gaa_depts_agys
 from lib.utils import initialize_states
 
 st.set_page_config(layout="wide",page_title="GAA Viewer",page_icon=":ledger:")
@@ -30,11 +30,15 @@ st.markdown(
     """, unsafe_allow_html=True
 )
 
-data = load_gaa_data()
+data = load_gaa_depts_agys()
 
 department = st.sidebar.selectbox("Department:",data.UACS_DPT_DSC.unique())
 agencies = data.loc[data.UACS_DPT_DSC==department,"UACS_AGY_DSC"].unique()
 agency = st.sidebar.selectbox("Agency:",agencies)
+
+if st.session_state["department"] != department or st.session_state["agency"] != agency:
+    st.session_state["searchterm_woutbudget"] = None
+    st.session_state["searchterm_raw"] = None
 
 st.session_state["department"] = department
 st.session_state["agency"] = agency

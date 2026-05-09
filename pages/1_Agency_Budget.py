@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from lib.data_ops import load_gaa_data_summary
+from lib.data_ops import load_gaa_data_summary_deptagy
 from lib.utils import initialize_states
 
 initialize_states()
@@ -9,7 +9,7 @@ initialize_states()
 department= st.session_state["department"]
 agency = st.session_state["agency"]
 
-summary = load_gaa_data_summary(department, agency)
+summary = load_gaa_data_summary_deptagy(department, agency)
 
 st.write(f"Total new appropriations: Php {int(summary.loc[summary.Name=="Total New Appropriations","Total"].values[0]):,d}")
 
@@ -35,8 +35,6 @@ with col2:
     st.plotly_chart(fig2)
 
 pill = st.pills("Up to:",["Cost structure","Programs","Subprograms","Activities"],default="Cost structure")
-
-formatting = {"group":"font-variant:small-caps; padding-left: 0; padding-top:1.5em;","purpose":"padding-left: 1em;","program":"padding-left: 2em;","sum":"padding-left: 1em;","total_sum":"padding-left: 0; padding-top:1em;","activity":"padding-left: 2em;","activity_program":"padding-left: 3em;","activity_subprogram":"padding-left: 4em;","subprogram":"padding-left: 3em;","project":"padding-left: 2em;"}
 
 format_dict={
     "group" : ["font-variant:small-caps; padding-left: 0.2em; padding-top:1.5em; background-color: rgba(255,116,108,0.4);"] + ["padding-top:1.5em; background-color: rgba(255,116,108,0.4);"]*5,

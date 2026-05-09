@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-from lib.data_ops import load_gaa_data_summary, load_gaa_data
+from lib.data_ops import load_gaa_data_summary_deptagy, get_gaa_data_wout_budget
 from lib.utils import initialize_states
 
 initialize_states()
@@ -12,7 +12,7 @@ agency = st.session_state["agency"]
 #######################   Highest stuff   #######################
 st.header("Highest budget per type")
 
-summary = load_gaa_data_summary(department, agency)
+summary = load_gaa_data_summary_deptagy(department, agency)
 
 df_list = []
 
@@ -41,23 +41,18 @@ st.table(df.style.apply(lambda s: formatting).format(formatter = lambda x: ' ' i
 #######################   No budget allocated   #######################
 st.header("Line items without allocated budget")
 
-raw_dept = load_gaa_data(department=department,agency=agency)
-wout_budget = raw_dept.loc[(raw_dept.PREXC_LEVEL==7)&pd.isna(raw_dept.AMT)].reset_index(drop=True)
-wout_budget["type"] = wout_budget.PREXC_FPAP_ID.str.get(6).map({"1":"Activity","2":"Locally-Funded Project","3":"Foreign-Assisted Project"})
-wout_budget["under"] = wout_budget.PREXC_FPAP_ID.str.get(0).map({"1":"General Administration and Support","2":"Support to Operations","3":"Operations"})
-
 col1, col2 = st.columns(2)
 with col1:
     searchterm = st.text_input("Search:")
-    if searchterm:
-        wout_budget = wout_budget.loc[wout_budget.DSC.str.lower().str.contains(searchterm.lower())].reset_index(drop=True)
+    if searchterm != st.session_state["searchterm_woutbudget"]:
+        data_woutbudget, numpages = get_gaa_data_wout_budget(department, agency, searchterm = searchterm, page = 1)
+        st.session_state["numpages_woutbudget"] = numpages
 
 with col2:
-    numitems = len(wout_budget)
-    numpages = (numitems+20-1)//20
-    page = st.selectbox("Page:",range(1,numpages+1),width=100)
+    page = st.selectbox("Page:",range(1,st.session_state["numpages_woutbudget"]+1),width=100)
+    if searchterm == st.session_state["searchterm_woutbudget"]:
+        data_woutbudget, numpages = get_gaa_data_wout_budget(department, agency, searchterm = searchterm, page = page)
 
-if numitems>0:
-    st.table(wout_budget[["DSC","type","under"]].iloc[(page-1)*20:page*20])
-else:
-    st.table(wout_budget[["DSC","type","under"]])
+st.session_state["searchterm_woutbudget"] = searchterm
+
+st.table(data_woutbudget)
