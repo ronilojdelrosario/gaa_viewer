@@ -6,6 +6,30 @@ st.set_page_config(layout="wide",page_title="GAA Viewer",page_icon=":ledger:")
 
 initialize_states()
 
+st.markdown(
+    r"""
+    <style>
+    button[data-testid="stExpandSidebarButton"] {
+            height: 3rem;
+            width : 3rem;
+            animation: bounce 2s ease infinite;
+        }
+    @keyframes bounce {
+        70% { transform:translateY(0%); }
+        80% { transform:translateY(-15%); }
+        90% { transform:translateY(0%); }
+        95% { transform:translateY(-7%); }
+        97% { transform:translateY(0%); }
+        99% { transform:translateY(-3%); }
+        100% { transform:translateY(0); }
+    }
+    button[data-testid="stExpandSidebarButton"] span {
+            font-size: 1.5em;
+    }
+    </style>
+    """, unsafe_allow_html=True
+)
+
 data = load_gaa_data()
 
 department = st.sidebar.selectbox("Department:",data.UACS_DPT_DSC.unique())
