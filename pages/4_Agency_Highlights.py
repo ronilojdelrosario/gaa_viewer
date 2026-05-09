@@ -41,9 +41,8 @@ st.table(df.style.apply(lambda s: formatting).format(formatter = lambda x: ' ' i
 #######################   No budget allocated   #######################
 st.header("Line items without allocated budget")
 
-raw = load_gaa_data()
-raw_dept = raw.loc[(raw.UACS_DPT_DSC==department)&(raw.UACS_AGY_DSC==agency)]
-wout_budget = raw_dept.loc[(raw.PREXC_LEVEL==7)&pd.isna(raw.AMT)].reset_index(drop=True)
+raw_dept = load_gaa_data(department=department,agency=agency)
+wout_budget = raw_dept.loc[(raw_dept.PREXC_LEVEL==7)&pd.isna(raw_dept.AMT)].reset_index(drop=True)
 wout_budget["type"] = wout_budget.PREXC_FPAP_ID.str.get(6).map({"1":"Activity","2":"Locally-Funded Project","3":"Foreign-Assisted Project"})
 wout_budget["under"] = wout_budget.PREXC_FPAP_ID.str.get(0).map({"1":"General Administration and Support","2":"Support to Operations","3":"Operations"})
 

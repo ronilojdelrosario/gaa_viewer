@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from lib.data_ops import get_department_agencies_budget, get_departments_budgets, load_gaa_data_summary
+from lib.data_ops import get_department_agencies_budget, get_departments_budgets, load_gaa_data_summary, load_gaa_data_summary_forchart
 from lib.utils import initialize_states
 
 initialize_states()
@@ -55,9 +55,8 @@ st.write("##")
 st.write("##")
 
 ##################################   Budget Distribution By Type   ##################################
-summary = load_gaa_data_summary()
 
-summary_dept_chart = summary.loc[(summary.type=="purpose")&(summary.UACS_DPT_DSC==department)].drop(columns=["Total","UACS_DPT_DSC"]).melt(id_vars=["Name","UACS_AGY_DSC","type"],var_name="Expense Type",value_name="AMT")
+summary_dept_chart = load_gaa_data_summary(department=department,type="purpose").drop(columns=["Total"]).melt(id_vars=["Name","UACS_AGY_DSC"],var_name="Expense Type",value_name="AMT")
 
 st.header("Budget Distribution by Cost Structure and Expense Type", text_alignment = "center")
 
@@ -99,8 +98,7 @@ st.write("##")
 
 ##########################   Budget Distribution By Type (All Depts)   ##########################
 
-summary_depts_all = summary.loc[(summary.type=="purpose")].drop(columns=["Total","UACS_AGY_DSC"]).groupby(["Name","type","UACS_DPT_DSC"], as_index=False,
-                    sort=False).sum().melt(id_vars=["Name","UACS_DPT_DSC","type"],var_name="Expense Type",value_name="AMT")
+summary_depts_all = load_gaa_data_summary_forchart()
 
 st.header("All Departments", text_alignment = "center")
 

@@ -9,8 +9,7 @@ initialize_states()
 department= st.session_state["department"]
 agency = st.session_state["agency"]
 
-data = load_gaa_data()
-data_sub = data.loc[(data.UACS_DPT_DSC==department)&(data.UACS_AGY_DSC==agency)]
+data_sub = load_gaa_data(department=department,agency=agency)
 st.write("The column \"AMT\" corresponds to the budget amount alloted, and has a unit of \"thousand pesos\"")
 
 col1, col2 = st.columns(2)
