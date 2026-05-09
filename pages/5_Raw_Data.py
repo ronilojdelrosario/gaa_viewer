@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from lib.data_ops import load_gaa_data
+from lib.utils import initialize_states
+
+initialize_states()
 
 department= st.session_state["department"]
 agency = st.session_state["agency"]

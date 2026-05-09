@@ -1,12 +1,10 @@
 import streamlit as st
 from lib.data_ops import load_gaa_data
+from lib.utils import initialize_states
 
 st.set_page_config(layout="wide",page_title="GAA Viewer",page_icon=":ledger:")
 
-if "department" not in st.session_state:
-    st.session_state["department"] = "Congress of the Philippines (CONGRESS)"
-if "agency" not in st.session_state:
-    st.session_state["agency"] = "Senate"
+initialize_states()
 
 data = load_gaa_data()
 

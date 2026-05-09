@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from lib.data_ops import get_department_agencies_budget, get_departments_budgets, load_gaa_data_summary
+from lib.utils import initialize_states
+
+initialize_states()
 
 ######################################   Budget Distribution   ######################################
 st.header("Budget Distribution", text_alignment = "center")
