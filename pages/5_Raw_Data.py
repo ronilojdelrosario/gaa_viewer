@@ -25,4 +25,4 @@ with col2:
 
 st.session_state["searchterm_raw"] = searchterm
 
-st.table(data_raw)
+st.table(data_raw.style.format(precision=0,thousands=",",na_rep=""))
