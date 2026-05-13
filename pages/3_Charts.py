@@ -31,7 +31,7 @@ with col_1_1:   # Budget of agencies within the department
     fig_agy_dept.update_layout( legend = dict(yanchor = "top", y = -0.05, xanchor = "left", x = 0.05, maxheight = 0.2),
                                 margin = dict(l = 30, r = 30, t = 0))
     
-    st.plotly_chart(fig_agy_dept)
+    st.plotly_chart(fig_agy_dept, key="agencies_dept")
 
 # Load departments' budgets
 depts_budgets = get_departments_budgets()
@@ -49,7 +49,7 @@ with col_1_2:
     fig_depts.update_layout( legend = dict(yanchor = "top", y = -0.05, xanchor = "left", x = 0.05, maxheight = 0.2),
                              margin = dict(l = 30, r = 30, t = 0))
     
-    st.plotly_chart(fig_depts)
+    st.plotly_chart(fig_depts, key="depts_all")
 
 st.write("##")
 st.write("##")
@@ -76,7 +76,7 @@ with col_2_1: # Budget per agency per cost structure
     fig_bar_agy_dept1.update_layout( margin = dict(l = 0, r = 0, t = 140, b=0),
                                     legend = dict(yanchor = "top", y = 1, yref = 'container', xanchor = "left", x = 0, maxheight = 0.5))
 
-    st.plotly_chart(fig_bar_agy_dept1)
+    st.plotly_chart(fig_bar_agy_dept1, key="agencies_1")
 
 with col_2_2: # Budget per agency per expense type
     summary_dept_chart2 = summary_dept_chart[["UACS_AGY_DSC", "Expense Type", "AMT"]].groupby(["UACS_AGY_DSC", "Expense Type"], as_index = False, sort=False).sum()
@@ -90,7 +90,7 @@ with col_2_2: # Budget per agency per expense type
     fig_bar_agy_dept2.update_layout(margin = dict(l = 0, r = 0, t = 140, b = 0),
                                     legend = dict(yanchor = "top", y = 1, yref = 'container', xanchor = "left", x = 0, maxheight = 0.5))
     
-    st.plotly_chart(fig_bar_agy_dept2)
+    st.plotly_chart(fig_bar_agy_dept2, key="agencies_2")
 
 
 st.write("##")
@@ -118,7 +118,7 @@ with col_3_1: # Budget per department per cost structure
     summary_depts_all_chart1.update_layout( margin = dict(l = 0, r = 0, t = 140, b=0),
                                     legend = dict(yanchor = "top", y = 1, yref = 'container', xanchor = "left", x = 0, maxheight = 0.5))
 
-    st.plotly_chart(summary_depts_all_chart1)
+    st.plotly_chart(summary_depts_all_chart1, key="depts_1")
 
 with col_3_2: # Budget per department per expense type
     summary_depts_all_data2 = summary_depts_all[["UACS_DPT_DSC", "Expense Type", "AMT"]].groupby(["UACS_DPT_DSC", "Expense Type"], as_index = False, sort=False).sum()
@@ -133,4 +133,4 @@ with col_3_2: # Budget per department per expense type
     summary_depts_all_chart1.update_layout(margin = dict(l = 0, r = 0, t = 140, b = 0),
                                     legend = dict(yanchor = "top", y = 1, yref = 'container', xanchor = "left", x = 0, maxheight = 0.5))
     
-    st.plotly_chart(summary_depts_all_chart1)
+    st.plotly_chart(summary_depts_all_chart1, key="depts_2")

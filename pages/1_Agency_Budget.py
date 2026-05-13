@@ -9,6 +9,8 @@ initialize_states()
 department= st.session_state["department"]
 agency = st.session_state["agency"]
 
+st.subheader(f"{department} - {agency}")
+
 summary = load_gaa_data_summary_deptagy(department, agency)
 
 st.write(f"Total new appropriations: Php {int(summary.loc[summary.Name=="Total New Appropriations","Total"].values[0]):,d}")
@@ -50,7 +52,7 @@ format_dict={
 }
 
 summary_todisplay = summary.loc[(summary.type.isin(["group"]))|(summary.Total>0)].reset_index(drop=True)
-if summary.loc[summary.Name=="Total, Project(s)","Total"].values[0] ==0:
+if (len(summary.loc[summary.Name=="Total, Project(s)"])) and (summary.loc[summary.Name=="Total, Project(s)","Total"].values[0] ==0):
     summary_todisplay = summary_todisplay.loc[summary_todisplay.Name!="B. Project(s)"].reset_index(drop=True)
 
 if pill == "Cost structure":
@@ -64,3 +66,30 @@ formatting_temp = summary_todisplay.type.map(format_dict)
 formatting_df = pd.DataFrame(formatting_temp.tolist(),columns=summary_todisplay.drop(columns=["type"]).columns).rename(columns={"Name":""})
 
 st.table(summary_todisplay.drop(columns=["type"]).rename(columns={"Name":""}).style.apply(lambda s: formatting_df,axis=None).format(formatter = lambda x: ' ' if (x==0 or pd.isna(x)) else (x if isinstance(x,str) else f"{int(x):,d}"),thousands=",").set_properties(subset=["Personnel Services","Maintenance and Other Operating Expenses","Financial Expenses","Capital Outlays","Total"],width="100px"),border='horizontal')
+
+#######################   Highest stuff   #######################
+st.header("Highest budget per type")
+
+df_list = []
+
+# Total
+df_list.append(pd.DataFrame([["Total:"]],columns=["Name"]))
+df_list.append(summary.loc[summary.Name=="Total New Appropriations"].drop(columns=["type"]).reset_index(drop=True))
+# Highest cost structure
+df_list.append(pd.DataFrame([["Highest budget (group):"]],columns=["Name"]))
+df_list.append(summary.loc[(summary.type=="purpose")].drop(columns=["type"]).sort_values("Total",ascending=False).head(1).reset_index(drop=True))
+# Highest program
+df_list.append(pd.DataFrame([["Highest budget (program):"]],columns=["Name"]))
+df_list.append(summary.loc[(summary.type=="program")].drop(columns=["type"]).sort_values("Total",ascending=False).head(1).reset_index(drop=True))
+# Highest activity
+df_list.append(pd.DataFrame([["Highest budget (activities - regular programs):"]],columns=["Name"]))
+df_list.append(summary.loc[(summary.type.str.startswith("activity"))].drop(columns=["type"]).sort_values("Total",ascending=False).head(1).reset_index(drop=True))
+# Highest project
+df_list.append(pd.DataFrame([["Highest budget (projects):"]],columns=["Name"]))
+df_list.append(summary.loc[(summary.type=="project")].drop(columns=["type"]).sort_values("Total",ascending=False).head(1).reset_index(drop=True))
+
+df = pd.concat(df_list).reset_index(drop=True)
+
+formatting = df.Total.apply(lambda x: "padding-left: 2em; padding-bottom:0.5em;" if x>0 else "padding: 1em 0.5em 0.5em 0.25em; text-transform: uppercase;").rename("Name")
+
+st.table(df.style.apply(lambda s: formatting).format(formatter = lambda x: ' ' if (x==0 or pd.isna(x)) else (x if isinstance(x,str) else f"{int(x):,d}"),thousands=","),border=False)

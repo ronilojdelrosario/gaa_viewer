@@ -45,5 +45,5 @@ st.session_state["agency"] = agency
 
 st.info("Use with caution. This is a rough draft. Raw data is from DBM website, but summary calculations are done by me.", icon="ℹ️")
 
-pg = st.navigation([st.Page("pages//1_Agency_Budget.py"),st.Page("pages//2_Agency_Breakdown_By_Expense_Type.py"),st.Page("pages//3_Charts.py"),st.Page("pages//4_Agency_Highlights.py"),st.Page("pages//5_Raw_Data.py")])
+pg = st.navigation([st.Page("pages//1_Agency_Budget.py"),st.Page("pages//2_Agency_Breakdown_By_Expense_Type.py"),st.Page("pages//3_Charts.py"),st.Page("pages//4_Agency_Activities_and_Projects_Search.py"),st.Page("pages//5_Raw_Data.py")])
 pg.run()

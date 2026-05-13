@@ -7,10 +7,29 @@ def get_agency_summary(data):
     cols = ["Personnel Services","Maintenance and Other Operating Expenses","Financial Expenses","Capital Outlays"]
 
     # Masks
-    is_agency_associated_item = data.FUNDCD=="10101101"
+    is_item_included = (data.FUNDCD=="10101101")|(data.SORDER==2)|(data.DEPARTMENT=="35")
     is_expense_type = {}
     for c in cols:
         is_expense_type[c] = data.UACS_EXP_DSC==c
+
+    if data.SORDER.values[0]==2:
+        data_obj = [{"Name":"Total","type":"group"}]
+        for c in cols:
+            data_obj[0][c] = 0
+        subdata = data.loc[~pd.isna(data.AMT)].reset_index(drop=True)
+        for x in subdata.itertuples():
+            data_obj.append({"Name":x.DSC,"type":"activity",x.UACS_EXP_DSC:x.AMT})
+            if x.UACS_EXP_DSC in data_obj[0]:
+                data_obj[0][x.UACS_EXP_DSC] += x.AMT
+        total_obj = {"Name":"Total New Appropriations","type":"total_sum"}
+        for c in cols:
+            if c in data_obj[0]:
+                total_obj[c] = data_obj[0][c]
+        data_obj.append(total_obj)
+        summary_df = pd.DataFrame(data_obj)
+        summary_df["Total"] = summary_df[cols].sum(axis=1)
+
+        return summary_df
 
     data_obj = []
     # "Purpose" level (Regular Programs)
@@ -20,7 +39,7 @@ def get_agency_summary(data):
                {"Name":"Operations","type":"purpose"},
                {"Name":"Total, Regular Program(s)","type":"sum"}]
     for c in cols:
-        data_sub = data[is_agency_associated_item&is_expense_type[c]]
+        data_sub = data[is_item_included&is_expense_type[c]]
         reg_obj[0][c] = 1000*int(data_sub.loc[(data_sub.PREXC_FPAP_ID.str.get(0)=="1")&(data_sub.PREXC_FPAP_ID.str.get(6)=="1"),"AMT"].sum())
         reg_obj[1][c] = 1000*int(data_sub.loc[(data_sub.PREXC_FPAP_ID.str.get(0)=="2")&(data_sub.PREXC_FPAP_ID.str.get(6)=="1"),"AMT"].sum())
         reg_obj[2][c] = 1000*int(data_sub.loc[(data_sub.PREXC_FPAP_ID.str.get(0)=="3")&(data_sub.PREXC_FPAP_ID.str.get(6)=="1"),"AMT"].sum())
@@ -36,7 +55,7 @@ def get_agency_summary(data):
                 entry = {"Name":prog.DSC,"type":"program"}
                 startID = prog.PREXC_FPAP_ID[:3+1]
                 for c in cols:
-                    entry[c] = 1000*int(data.loc[is_agency_associated_item & is_expense_type[c] & data.PREXC_FPAP_ID.str.startswith(startID) & (data.PREXC_FPAP_ID.str.get(6)=="1"),"AMT"].sum())
+                    entry[c] = 1000*int(data.loc[is_item_included & is_expense_type[c] & data.PREXC_FPAP_ID.str.startswith(startID) & (data.PREXC_FPAP_ID.str.get(6)=="1"),"AMT"].sum())
                 data_obj.append(entry)
 
                 # "Subprograms" level (Under Programs)
@@ -47,7 +66,7 @@ def get_agency_summary(data):
                     entry = {"Name":subprog.DSC,"type":"subprogram"}
                     substartID = subprog.PREXC_FPAP_ID[:5+1]
                     for c in cols:
-                        entry[c] = 1000*int(data.loc[is_agency_associated_item & is_expense_type[c] & data.PREXC_FPAP_ID.str.startswith(substartID) & (data.PREXC_FPAP_ID.str.get(6)=="1"),"AMT"].sum())
+                        entry[c] = 1000*int(data.loc[is_item_included & is_expense_type[c] & data.PREXC_FPAP_ID.str.startswith(substartID) & (data.PREXC_FPAP_ID.str.get(6)=="1"),"AMT"].sum())
                     data_obj.append(entry)
 
                     # "Activities" level (Under Subprograms)
@@ -55,7 +74,7 @@ def get_agency_summary(data):
                     for act in acts.itertuples():
                         entry = {"Name":act.DSC,"type":"activity_subprogram"}
                         for c in cols:
-                            entry[c] = 1000*int(data.loc[is_agency_associated_item & is_expense_type[c] & (data.PREXC_FPAP_ID==act.PREXC_FPAP_ID),"AMT"].sum())
+                            entry[c] = 1000*int(data.loc[is_item_included & is_expense_type[c] & (data.PREXC_FPAP_ID==act.PREXC_FPAP_ID),"AMT"].sum())
                         data_obj.append(entry)
 
                 # "Activities" level (Under Programs)
@@ -63,7 +82,7 @@ def get_agency_summary(data):
                 for act in acts.itertuples():
                     entry = {"Name":act.DSC,"type":"activity_program"}
                     for c in cols:
-                        entry[c] = 1000*int(data.loc[is_agency_associated_item & is_expense_type[c] & (data.PREXC_FPAP_ID==act.PREXC_FPAP_ID),"AMT"].sum())
+                        entry[c] = 1000*int(data.loc[is_item_included & is_expense_type[c] & (data.PREXC_FPAP_ID==act.PREXC_FPAP_ID),"AMT"].sum())
                     data_obj.append(entry)
 
         # "Activities" level (Under Cost Structure)
@@ -71,7 +90,7 @@ def get_agency_summary(data):
         for act in acts.itertuples():
             entry = {"Name":act.DSC,"type":"activity"}
             for c in cols:
-                entry[c] = 1000*int(data.loc[is_agency_associated_item & is_expense_type[c] & (data.PREXC_FPAP_ID==act.PREXC_FPAP_ID),"AMT"].sum())
+                entry[c] = 1000*int(data.loc[is_item_included & is_expense_type[c] & (data.PREXC_FPAP_ID==act.PREXC_FPAP_ID),"AMT"].sum())
             data_obj.append(entry)
 
     data_obj.append(reg_obj[3])
@@ -82,7 +101,7 @@ def get_agency_summary(data):
                {"Name":"Foreign-Assisted Project(s)","type":"purpose"},
                {"Name":"Total, Project(s)","type":"sum"}]
     for c in cols:
-        proj_obj[0][c] = 1000*int(data.loc[is_agency_associated_item & is_expense_type[c] & (data.PREXC_FPAP_ID.str.get(6)=="2"),"AMT"].sum())
+        proj_obj[0][c] = 1000*int(data.loc[is_item_included & is_expense_type[c] & (data.PREXC_FPAP_ID.str.get(6)=="2"),"AMT"].sum())
         proj_obj[1][c] = 1000*int(data.loc[is_expense_type[c] & (data.PREXC_FPAP_ID.str.get(6)=="3"),"AMT"].sum())
         proj_obj[2][c] = proj_obj[0][c] + proj_obj[1][c]
 
@@ -92,7 +111,7 @@ def get_agency_summary(data):
     for lproj in local_proj_df.itertuples():
         entry = {"Name":lproj.DSC,"type":"project"}
         for c in cols:
-            entry[c] = 1000*int(data.loc[is_agency_associated_item & is_expense_type[c] & (data.PREXC_FPAP_ID==lproj.PREXC_FPAP_ID),"AMT"].sum())
+            entry[c] = 1000*int(data.loc[is_item_included & is_expense_type[c] & (data.PREXC_FPAP_ID==lproj.PREXC_FPAP_ID),"AMT"].sum())
         data_obj.append(entry)
 
     data_obj.append(proj_obj[1])

@@ -9,6 +9,8 @@ def initialize_states():
         st.session_state["searchterm_woutbudget"] = None
     if "numpages_woutbudget" not in st.session_state:
         st.session_state["numpages_woutbudget"] = 100
+    if "filter_woutbudget" not in st.session_state:
+        st.session_state["filter_woutbudget"] = None
     if "searchterm_raw" not in st.session_state:
         st.session_state["searchterm_raw"] = None
     if "numpages_raw" not in st.session_state:

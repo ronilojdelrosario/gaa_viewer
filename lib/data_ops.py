@@ -28,7 +28,10 @@ def get_department_agencies_budget(department):
     data_all = load_gaa_data_raw()
     data = data_all.loc[data_all.UACS_DPT_DSC==department]
     # Either budget for specific agencies or for foreign-assisted projects
-    data_sub = data.loc[(data.FUNDCD=="10101101")|(data.PREXC_FPAP_ID.str.get(6)=="3")]
+    if data.SORDER.values[0]==1:
+        data_sub = data.loc[(data.FUNDCD=="10101101")|(data.PREXC_FPAP_ID.str.get(6)=="3")]
+    else:
+        data_sub = data.copy()
     return data_sub[["UACS_AGY_DSC","AMT"]].rename(columns={"UACS_AGY_DSC":"Agency"}).groupby("Agency",as_index=False).sum()
 
 
@@ -36,21 +39,28 @@ def get_department_agencies_budget(department):
 def get_departments_budgets():
     data = load_gaa_data_raw()
     # Either budget for specific agencies or for foreign-assisted projects
-    data_sub = data.loc[(data.FUNDCD=="10101101")|(data.PREXC_FPAP_ID.str.get(6)=="3")]
+    data_sub = data.loc[(data.FUNDCD=="10101101")|(data.PREXC_FPAP_ID.str.get(6)=="3")|(data.SORDER==2)]
     return data_sub[["UACS_DPT_DSC","AMT"]].rename(columns={"UACS_DPT_DSC":"Department"}).groupby("Department",as_index=False).sum()
 
 @st.cache_data(max_entries=10,show_spinner=False)
-def get_gaa_data_wout_budget(department,agency,searchterm = "", page = 1,show_spinner=False):
+def get_gaa_data_wout_budget(department,agency,searchterm = "", page = 1,typefilter="With Budget"):
     data = load_gaa_data_raw_dptagy(department=department,agency=agency)
-    wout_budget = data.loc[(data.PREXC_LEVEL==7)&pd.isna(data.AMT)&(data.DSC.str.lower().str.contains(searchterm.lower()))].reset_index(drop=True)
+    if typefilter=="With Budget":
+        filterarr = ~pd.isna(data.AMT)
+        cols = ["DSC","type","under","UACS_OBJ_DSC","AMT"]
+    else:
+        filterarr = pd.isna(data.AMT)
+        cols = ["DSC","type","under"]
+    wout_budget = data.loc[(data.PREXC_LEVEL==7)&filterarr&(data.DSC.str.lower().str.contains(searchterm.lower()))].reset_index(drop=True)
     wout_budget["type"] = wout_budget.PREXC_FPAP_ID.str.get(6).map({"1":"Activity","2":"Locally-Funded Project","3":"Foreign-Assisted Project"})
     wout_budget["under"] = wout_budget.PREXC_FPAP_ID.str.get(0).map({"1":"General Administration and Support","2":"Support to Operations","3":"Operations"})
     numitems = len(wout_budget)
     numpages = (numitems+20-1)//20
+    wout_budget["AMT"] = 1000*wout_budget["AMT"]
     if numitems > 0:
-        return wout_budget[["DSC","type","under"]].iloc[(page-1)*20:page*20], numpages
+        return wout_budget[cols].iloc[(page-1)*20:page*20], numpages
     else:
-        return wout_budget[["DSC","type","under"]], 0
+        return wout_budget[cols], 0
     
 @st.cache_data(max_entries=10,show_spinner=False)
 def get_gaa_data_raw_search(department,agency,searchterm = "", page = 1):
