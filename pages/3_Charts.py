@@ -34,7 +34,8 @@ with col_1_1:   # Budget of agencies within the department
     st.plotly_chart(fig_agy_dept, key="agencies_dept")
 
 # Load departments' budgets
-depts_budgets = get_departments_budgets()
+depts_budgets_all = get_departments_budgets()
+depts_budgets = depts_budgets_all.loc[~depts_budgets_all.Department.isin(["Automatic Appropriations","New General Appropriations"])]
 depts_budgets["AMT"] = 1000*depts_budgets["AMT"]
 
 with col_1_2:

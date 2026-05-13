@@ -28,7 +28,7 @@ def get_department_agencies_budget(department):
     data_all = load_gaa_data_raw()
     data = data_all.loc[data_all.UACS_DPT_DSC==department]
     # Either budget for specific agencies or for foreign-assisted projects
-    if data.SORDER.values[0]==1:
+    if data.SORDER.values[0]==1 and data.DEPARTMENT.values[0] != "35":
         data_sub = data.loc[(data.FUNDCD=="10101101")|(data.PREXC_FPAP_ID.str.get(6)=="3")]
     else:
         data_sub = data.copy()
